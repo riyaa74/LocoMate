@@ -86,7 +86,23 @@ def recommend_places(user_profile, location):
         #print(json_string)
 
         # Parse the JSON string
-        response_json = json.loads(json_string)
+        # print("Raw JSON String:", json_string) 
+        # response_json = json.loads(json_string)
+        json_string = json_string.strip()  # Remove extra spaces/newlines
+
+        # ✅ Fix encoding issues
+        json_string = json_string.encode('utf-8').decode('utf-8')
+
+        # ✅ Try replacing problematic characters
+        json_string = json_string.replace("\n", " ").replace("\r", " ")
+
+        # ✅ Now, parse JSON safely
+        try:
+            response_json = json.loads(json_string)
+        except json.JSONDecodeError as e:
+            print("🚨 JSON Parsing Error:", str(e))
+            print("Invalid JSON String:", json_string)  # Debugging
+            return [], "Error: Invalid JSON received"
 
         # Extract formatted text and recommendations
         formatted_text = response_json["text"]

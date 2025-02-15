@@ -28,7 +28,7 @@
             padding: 20px;
             overflow-y: hidden; /* Prevent overflow on y-axis */
         }
-        .view-buttons {
+        /* .view-buttons {
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
@@ -45,7 +45,32 @@
         }
         .view-buttons button:hover {
             background-color: #022d5f;
+        } */
+        .view-buttons {
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px; /* Adds gap between buttons */
+        justify-content: center;
         }
+        .view-buttons button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ffffff, #f7f7f7);
+            color: #034f84;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+            font-size: 14px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        .view-buttons button:hover {
+            background: linear-gradient(135deg, #f7f7f7, #ffffff);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
         .formatted-text {
             margin-bottom: 20px;
             background-color: #ffffff;
@@ -103,6 +128,7 @@
             <button onclick="toggleView('cubes')">Recommendations as Cubes</button>
             <button onclick="window.location.href='chatbot'">Talk to NavPal</button>
             <button id="create-itinerary" onclick="createItinerary()">Create Itinerary</button>
+            <button id="LocoCart" onclick="createCart()">LocoCart</button>
         </div>
         
         <div id="formatted-text" class="formatted-text"></div>
@@ -278,6 +304,33 @@ function createItinerary() {
         });
     } else {
         alert("Please select at least one place to create an itinerary.");
+    }
+}
+
+function createCart() {
+    if (selectedPlaces.length > 0) {
+        // Send the selected places to the backend
+        fetch('/create_cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ places: selectedPlaces })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the budget.html page
+                window.location.href = 'cart.html';
+            } else {
+                alert("An error occurred while creating the cart.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        alert("Please select at least one place to create an cart.");
     }
 }
 
