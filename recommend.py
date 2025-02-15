@@ -31,7 +31,8 @@ api_key=secrets.GEMINI_API_KEY
 
 #     return response.text
 #     - Labeled places: {', '.join(user_profile['labeled_places'])}
-#     # - Reservations: {', '.join(user_profile['reservations'])}
+#     # - Reservations: {', '.join(user_profile['reservations'])} 
+    
 
 def recommend_places(user_profile, location):
     prompt = f"""

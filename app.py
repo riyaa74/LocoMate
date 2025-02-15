@@ -7,12 +7,14 @@ import tempfile
 from preprocess import curate_user_profile
 from recommend import recommend_places
 from getPlacesData import get_lat_lon_google
-from chatbot import generate_answer
+from chatbot import generate_answer, describe_image
+import base64
 
 places_api_key = secrets.PLACES_API_KEY
 gemini_api_key = secrets.GEMINI_API_KEY
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
+app.secret_key = os.urandom(24)
 app.config['GOOGLE_MAPS_API_KEY'] = secrets.PLACES_API_KEY
 
 @app.route('/')
@@ -39,7 +41,8 @@ def send_message():
     user_message = request.json.get('message')
     
     # Generate bot response
-    bot_response = generate_answer(conversation_history, user_message, api_key=gemini_api_key)
+    bot_response = generate_answer("", "Hello", api_key=gemini_api_key)
+    # bot_response = generate_answer(conversation_history, user_message, api_key=gemini_api_key)
     
     # Update conversation history
     conversation_history.append((user_message, bot_response))
@@ -92,11 +95,35 @@ def recommendations_data():
     recommendations = session.get('recommendations')
     location = session.get('location')
     place = get_lat_lon_google(location,places_api_key)
+    print(recommendations, ' in recommendations-data')
 
     if not formatted_text or not recommendations:
         return jsonify({"error": "No recommendations found"}), 400
 
     return jsonify({"text": formatted_text, "recommendations": recommendations, "lat":place[0], "lon":place[1]})
+
+@app.route('/send_photo', methods=['POST'])
+def send_photo():
+    photo_data = request.json.get('photo')
+    
+    # Decode the base64-encoded photo
+    photo_bytes = base64.b64decode(photo_data.split(',')[1])
+    
+    # Save the photo to a temporary location
+    # with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
+    #     temp_file.write(photo_bytes)
+    #     photo_path = temp_file.name
+    
+    # Generate a response using the LLM
+    # user_message = f"User uploaded a photo. Photo saved at {photo_path}."
+    global conversation_history
+    # bot_response = generate_answer(conversation_history, user_message, api_key=gemini_api_key)
+    bot_response = describe_image(photo_bytes, gemini_api_key)
+    
+    # Update conversation history
+    conversation_history.append(("Image", bot_response))
+    
+    return jsonify({'response': bot_response})
 
 @app.route("/submit_form", methods=["POST"])
 def submit_form():
@@ -123,10 +150,11 @@ def submit_form():
         user_profile = curate_user_profile(temp_dir+'/Takeout', user_info)
 
     session['user_profile'] = user_profile
-    print(request.form.get("location", "").strip(), "in submit form of APP.PY")
+    #print(user_profile)
+    #print(request.form.get("location", "").strip(), "in submit form of APP.PY")
     session['location'] = request.form.get("location", "").strip()
 
-    return redirect(url_for("preferences"))
+    return redirect(url_for("radius"))
 
 @app.route("/process_recommendations")
 def process_recommendations():
@@ -135,9 +163,9 @@ def process_recommendations():
     
     if not user_profile or not location :
         return jsonify({"error": "Missing user profile, location"}), 400
-    print(location+" app.py")
+    #rint(user_profile," app.py")
     recommendations, text = recommend_places(user_profile, location)
-    print(location+" app.py")
+    #print(location+" app.py")
     #print(recommendations)
     # Store recommendations in the session or temporary storage
     session['recommendations'] = recommendations

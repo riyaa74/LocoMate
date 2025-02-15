@@ -1,4 +1,25 @@
 import google.generativeai as genai
+from PIL import Image
+import io
+
+def describe_image(image_data, api_key):
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-1.5-pro")
+
+    try:
+        image = Image.open(io.BytesIO(image_data))
+
+        image_content = {
+            'mime_type': 'image/jpeg',  # Adjust if your image is in a different format
+            'data': image_data
+        }
+
+        prompt = "Describe the place shown in the image."
+        response = model.generate_content(contents=[prompt, image_content])
+        return response.text
+    except Exception as e:
+        return f"An error occurred while processing the image: {e}"
 
 def generate_answer(conversation_history, new_question, model="gemini-2.0-flash", temperature=0.5, api_key=""):
     """

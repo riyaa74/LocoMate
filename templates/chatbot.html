@@ -216,31 +216,31 @@
         }
 
         async function uploadPhoto() {
-            const photoUpload = document.getElementById('photo-upload');
-            if (photoUpload.files.length > 0) {
-                const file = photoUpload.files[0];
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const photoMessage = `<img src="${e.target.result}" alt="Uploaded Photo">`;
-                    addMessage(photoMessage, 'user-message photo-message');
-                    
-                    // Send the photo to the backend
-                    const response = await fetch('/send_photo', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ photo: e.target.result })
-                    });
-                    const data = await response.json();
-                    
-                    // Add the bot response to the chat
-                    addMessage(data.response, 'bot-message');
-                    speakText(data.response);
-                };
-                reader.readAsDataURL(file);
-            }
+        const photoUpload = document.getElementById('photo-upload');
+        if (photoUpload.files.length > 0) {
+            const file = photoUpload.files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const photoMessage = `<img src="${e.target.result}" alt="Uploaded Photo">`;
+                addMessage(photoMessage, 'user-message photo-message');
+
+                // Send the photo to the backend
+                const response = await fetch('/send_photo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ photo: e.target.result })
+                });
+                const data = await response.json();
+
+                // Add the bot response to the chat
+                addMessage(data.response, 'bot-message');
+                speakText(data.response);
+            };
+            reader.readAsDataURL(file);
         }
+    }
     </script>
 </head>
 <body>
