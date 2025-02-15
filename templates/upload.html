@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffe3e3;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: linear-gradient(135deg, #92a8d1, #f7786b);
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 400px;
+            text-align: center;
+        }
+        .upload-section {
+            border: 2px dashed #007bff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .upload-section.hide {
+            display: none;
+        }
+        .upload-section p {
+            margin: 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .upload-section input[type="file"] {
+            display: none;
+        }
+        .upload-section label {
+            display: block;
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #file-name {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script>
+        function showFileName() {
+            const fileInput = document.getElementById('file-upload');
+            const fileName = document.getElementById('file-name');
+            const uploadSection = document.querySelector('.upload-section');
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+                uploadSection.classList.add('hide');
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Upload Your File & Choose Categories</h2>
+        <form action="/submit_form" method="post" enctype="multipart/form-data">
+            <div class="upload-section">
+                <p>Drag and drop your file</p>
+                <p>Or</p>
+                <label for="file-upload">Browse file</label>
+                <input type="file" id="file-upload" name="file-upload" accept=".zip" onchange="showFileName()" required>
+            </div>
+            <p id="file-name"></p>
+            <div class="form-group">
+                <label for="location">Location (Please mention zip code)</label>
+                <input type="text" id="location" name="location">
+            </div>
+            <div class="form-group">
+                <label for="additional-info">Any additional information can be added here</label>
+                <input type="text" id="additional-info" name="additional-info">
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

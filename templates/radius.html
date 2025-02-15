@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportation Preferences</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffe3e3;
+            background-image: linear-gradient(135deg, #92a8d1, #f7786b);
+            
+        }
+        header {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding-top: 20px;
+        }
+        header nav {
+            display: flex;
+        }
+        header nav a {
+            margin-right: 20px;
+            text-decoration: none;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        header nav a:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 35px;
+            color: #000000;
+            font-weight: bold;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            padding-top: 3%;
+        }
+        .sidebar, .map {
+            width: 50%;
+            height: 60vh;
+            background-color: #F3F5EA;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .address {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        .address label {
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #034f84;
+        }
+        .address input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .transportation-method {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .transportation-method label {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #034f84;
+        }
+        .transportation-method input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .transportation-method input[type="range"] {
+            flex: 1;
+        }
+        .info-text {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #161c20;
+        }
+        .button-container {
+        display: flex;
+        justify-content: center; /* Centers the button horizontally */
+        align-items: center;
+        padding-top: 50px; /* Increased space above the button */
+        width: 100%; /* Ensures full width alignment */
+    }
+
+    .submit-btn {
+        background-color: #000; /* Black background */
+        color: #fff; /* White text */
+        font-size: 18px;
+        font-weight: bold;
+        padding: 14px 28px; /* Slightly larger padding */
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .submit-btn:hover {
+        background-color: #222; /* Slightly lighter black */
+        transform: scale(1.05); /* Subtle scale effect */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .submit-btn:active {
+        transform: scale(0.98); /* Press-down effect */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+        
+    </style>
+</head>
+<body>
+    <br>
+    <h1>How Do You Like to Get Around?</h1>
+    <div class="container">
+        <div class="sidebar">
+
+            <h2>Transportation Methods</h2>
+            <div class="info-text">
+                <h3>Select the transportation methods you use and how far you're willing to travel with each method. We'll use this information to help you find the best places to visit.</h3>
+            </div>
+            <div class="transportation-method">
+                <input type="checkbox" id="walking" name="walking">
+                <label for="walking">Walking</label>
+                <input type="range" id="walkingRange" name="walkingRange" min="0" max="10">
+            </div>
+            <div class="transportation-method">
+                <input type="checkbox" id="biking" name="biking">
+                <label for="biking">Biking</label>
+                <input type="range" id="bikingRange" name="bikingRange" min="0" max="10">
+            </div>
+            <div class="transportation-method">
+                <input type="checkbox" id="driving" name="driving">
+                <label for="driving">Driving</label>
+                <input type="range" id="drivingRange" name="drivingRange" min="0" max="10">
+            </div>
+            <div class="transportation-method">
+                <input type="checkbox" id="bus" name="bus">
+                <label for="bus">Bus</label>
+                <input type="range" id="busRange" name="busRange" min="0" max="10">
+            </div>
+            <div class="transportation-method">
+                <input type="checkbox" id="train" name="train">
+                <label for="train">Train</label>
+                <input type="range" id="trainRange" name="trainRange" min="0" max="10">
+            </div>
+
+            <div class="button-container">
+                <button class="submit-btn" onclick="redirectToLoading()">Submit</button>
+            </div>
+        </div>
+        <div id="map" class="map"></div>
+    </div>
+    <script>
+        const apiKey = "{{ api_key }}";
+        let map;
+        const circles = {};
+
+        function initMap() {
+            const location = { lat: 37.422, lng: -122.084 };
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 13,
+                center: location,
+            });
+            new google.maps.Marker({
+                position: location,
+                map: map,
+                title: "Home Address",
+            });
+        }
+
+        function redirectToLoading() {
+        document.body.style.opacity = "0";  // Fade-out effect
+        setTimeout(() => {
+            window.location.href = "/loading";
+        }, 500);  // Delay for smooth transition
+    }
+
+        function updateCircle(method, radius) {
+            if (circles[method]) {
+                circles[method].setRadius(radius * 1609.34); // Convert miles to meters
+            } else {
+                const circle = new google.maps.Circle({
+                    map: map,
+                    center: map.getCenter(),
+                    radius: radius * 1609.34, // Convert miles to meters
+                    strokeColor: getColor(method),
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: getColor(method),
+                    fillOpacity: 0.35,
+                });
+                circles[method] = circle;
+            }
+        }
+
+        function getColor(method) {
+            switch (method) {
+                case 'walking': return '#FF0000';
+                case 'biking': return '#00FF00';
+                case 'driving': return '#0000FF';
+                case 'bus': return '#FFFF00';
+                case 'train': return '#FF00FF';
+                default: return '#000000';
+            }
+        }
+
+        document.querySelectorAll('.transportation-method input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', (event) => {
+                const method = event.target.name.replace('Range', '');
+                const radius = event.target.value;
+                updateCircle(method, radius);
+            });
+        });
+
+        document.querySelectorAll('.transportation-method input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (event) => {
+                const method = event.target.name;
+                if (!event.target.checked && circles[method]) {
+                    circles[method].setMap(null);
+                    delete circles[method];
+                }
+            });
+        });
+
+        window.initMap = initMap;
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap" async defer></script>
+</body>
+</html>

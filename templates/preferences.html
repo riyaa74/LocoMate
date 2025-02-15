@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preferences</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #ffe3e3;
+            background-image: linear-gradient(135deg, #92a8d1, #f7786b);
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .preferences {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .preference {
+            background-color: #ffffff;
+            border: 2px solid #034f84;
+            color: #034f84;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            border-radius: 10px;
+        }
+        .preference.selected {
+            background-color: #034f84;
+            color: #ffffff;
+        }
+        .submit-button {
+            padding: 15px 20px;
+            background-color: #034f84;
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        .submit-button:hover {
+            background-color: #022d5f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>What is important to you?</h1>
+        <p>We use these lifestyle preferences to help you narrow down the best places to visit. Please select at least 3.</p>
+        <div class="preferences">
+            <div class="preference">ACCESSIBILITY</div>
+            <div class="preference">AMENITIES</div>
+            <div class="preference">CASUAL DINING</div>
+            <div class="preference">CONVENIENT</div>
+            <div class="preference">FAMILY FRIENDLY</div>
+            <div class="preference">HEALTHY</div>
+            <div class="preference">QUIET</div>
+            <div class="preference">SAFETY</div>
+            <div class="preference">ACTIVE LIFESTYLE</div>
+            <div class="preference">ARTS AND MUSIC</div>
+            <div class="preference">CLEANLINESS</div>
+            <div class="preference">CULTURAL</div>
+            <div class="preference">FINE DINING</div>
+            <div class="preference">INTERNATIONAL CUISINE</div>
+            <div class="preference">SHOPPING</div>
+            <div class="preference">AFFORDABILITY</div>
+            <div class="preference">COMMUNITY</div>
+            <div class="preference">ENTERTAINMENT</div>
+            <div class="preference">GREEN SPACES</div>
+            <div class="preference">OUTDOOR ACTIVITIES</div>
+            <div class="preference">RELAXING</div>
+            <div class="preference">SOCIAL GATHERINGS</div>
+        </div>
+        <button class="submit-button" onclick="submitPreferences()">Submit Preferences</button>
+    </div>
+
+    <script>
+        const preferences = document.querySelectorAll('.preference');
+        preferences.forEach(preference => {
+            preference.addEventListener('click', () => {
+                preference.classList.toggle('selected');
+            });
+        });
+
+        function submitPreferences() {
+            const selectedPreferences = Array.from(preferences).filter(p => p.classList.contains('selected')).map(p => p.textContent);
+            if (selectedPreferences.length < 3) {
+                alert('Please select at least 3 preferences.');
+                return;
+            }
+            // Send the selected preferences to your backend or use them to suggest recommendations
+            console.log('Selected Preferences:', selectedPreferences);
+            // Example of sending data to the backend
+            fetch('/submit_preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ preferences: selectedPreferences }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                // Redirect to the loading page
+                window.location.href = '/radius';
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NestNav</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            overflow-x: hidden;
+        }
+        .container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #92a8d1, #f7786b);
+            overflow: hidden;
+            position: relative;
+        }
+        .title {
+            font-size: 3rem;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            animation: fadeInUp 1s ease-out;
+        }
+        .subtitle {
+            font-size: 1.5rem;
+            color: #ffffff;
+            text-align: center;
+            margin-top: 10px;
+            animation: fadeInUp 1.5s ease-out;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            animation: fadeInUp 2s ease-out;
+        }
+        .button {
+            padding: 15px 30px;
+            background-color: #ffffff;
+            color: #034f84;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: background-color 0.3s;
+            font-weight: 600;
+        }
+        .button:hover {
+            background-color: #034f84;
+            color: #ffffff;
+        }
+        .content {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 50px 20px;
+            /*background: url('https://images.unsplash.com/photo-1536528084984-d9938f1e2f90?ixlib=rb-1.2.1&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDZ8fHRyYXZlbHxlbnwwfHx8fDE2MTYyNzExMzE&auto=format&fit=crop&w=1350&q=80') no-repeat center center / cover;
+            */height: 40vh;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 2s ease-out;
+            position: relative;
+        }
+        .content h2 {
+            color: #034f84;
+            text-align: center;
+        }
+        .content p {
+            color: #555;
+            line-height: 1.6;
+        }
+        .content ol {
+            padding-left: 20px;
+            list-style: decimal;
+        }
+        .footer {
+            background-color: #034f84;
+            color: #ffffff;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 0.9rem;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .tutorial-btn {
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function scrollToTutorial() {
+            document.getElementById('tutorial').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="animation"></div>
+        <div class="title">Welcome to NestNav</div>
+        <div class="subtitle">Helping you find comfort in new locations</div>
+        <div class="buttons">
+            <div class="button tutorial-btn" onclick="scrollToTutorial()">Tutorial</div>
+        </div>
+    </div>
+    <div class="content" id="tutorial">
+        <h2>How to Get Started</h2>
+        <p>Ready to embark on your journey to personalized place suggestions? It's as easy as 1-2-3! 🚀</p>
+        <ol>
+            <li><strong>Visit Google Takeout:</strong> Head over to <a href="https://takeout.google.com" target="_blank">Google Takeout</a> and select the data you want to export. Think of it as packing your digital suitcase with all your travel essentials! 🧳</li>
+            <li><strong>Download Your Data:</strong> Once you've made your selections, hit that export button and let Google do the rest. Soon, you'll have your data packed and ready to go. 🎒</li>
+            <li><strong>Upload to Our Site:</strong> Bring your data home! Use the "Upload Data" button below to securely transfer your data to our website. 🌐</li>
+        </ol>
+        <div class="buttons">
+            <a class="button" href="https://takeout.google.com" target="_blank">Google Takeout</a>
+            <a class="button" href="/upload_form">Upload Data</a>
+        </div>
+    </div>
+    <div class="footer">
+        &copy; 2025 NestNav. All Rights Reserved.
+    </div>
+</body>
+</html>
+

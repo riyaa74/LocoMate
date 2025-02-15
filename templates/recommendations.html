@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Page</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&libraries=places" async defer></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: #ffe3e3;
+            background-image: linear-gradient(135deg, #92a8d1, #f7786b);
+            position: relative;
+        }
+        #map {
+            height: 100%;
+            width: 50%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .recommendations-container {
+            height: 100%;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: hidden; /* Prevent overflow on y-axis */
+        }
+        .view-buttons {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .view-buttons button {
+            padding: 10px 20px;
+            background-color: #034f84;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .view-buttons button:hover {
+            background-color: #022d5f;
+        }
+        .formatted-text {
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            color: #034f84;
+            display: none; /* Hidden by default */
+        }
+        .filters {
+            margin-bottom: 20px;
+            display: none; /* Hidden by default */
+        }
+        .filters label {
+            margin-right: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #034f84;
+        }
+        .recommendations-list {
+            height: 100%;
+            overflow-y: scroll;
+            display: none; /* Hidden by default */
+        }
+        .recommendation {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .recommendation:hover {
+            background-color: #443388;
+        }
+        .recommendation h3 {
+            color: #db50a6;
+            margin: 0 0 10px 0;
+        }
+        .recommendation p {
+            margin: 5px 0;
+        }
+        .selected {
+            background-color: lightblue;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div class="recommendations-container">
+        <div class="view-buttons">
+            <button onclick="toggleView('text')">Recommendations as Text</button>
+            <button onclick="toggleView('cubes')">Recommendations as Cubes</button>
+            <button onclick="window.location.href='chatbot'">Talk to NavPal</button>
+            <button id="create-itinerary" onclick="createItinerary()">Create Itinerary</button>
+        </div>
+        
+        <div id="formatted-text" class="formatted-text"></div>
+        <div class="filters"></div>
+        <div class="recommendations-list" id="recommendations-list"></div>
+    </div>
+
+    <script>
+        const apiKey = "{{ api_key }}";
+        let markers = [];
+        let recommendationsData = [];
+        let allTypes = new Set();
+        let selectedPlaces = [];
+
+        function initMap() {
+            fetch("/recommendations-data")
+                .then(response => response.json())
+                .then(data => {
+                    recommendationsData = data.recommendations;
+                    const formattedText = data.text;
+
+                    const map = new google.maps.Map(document.getElementById("map"), {
+                        center: { lat: data.lat, lng: data.lon },
+                        zoom: 12,
+                    });
+
+                    const formattedTextDiv = document.getElementById("formatted-text");
+                    formattedTextDiv.innerHTML = `
+                        <h3>Recommendations Breakdown</h3>
+                        <p>${formattedText}</p>
+                    `;
+
+                    recommendationsData.forEach(place => {
+                        place.types.split(', ').forEach(type => {
+                            allTypes.add(type);
+                        });
+                    });
+
+                    const filtersDiv = document.querySelector(".filters");
+                    filtersDiv.innerHTML = `<label><input type="radio" name="filter" value="all" checked onclick="filterRecommendations('all')"> All</label>`;
+                    allTypes.forEach(type => {
+                        filtersDiv.innerHTML += `<label><input type="radio" name="filter" value="${type}" onclick="filterRecommendations('${type}')"> ${type}</label>`;
+                    });
+
+                    const recommendationsList = document.getElementById("recommendations-list");
+                    recommendationsData.forEach((place, index) => {
+                        const recommendationDiv = document.createElement("div");
+                        recommendationDiv.className = "recommendation cube";
+                        recommendationDiv.innerHTML = `
+                            <h3>${place.name}</h3>
+                            <p>Rating: ${place.rating}</p>
+                            <p>Address: ${place.vicinity}</p>
+                            <p>Types: ${place.types}</p>
+                        `;
+                        recommendationDiv.setAttribute("data-index", index);
+                        recommendationDiv.setAttribute("data-types", place.types);
+                        recommendationsList.appendChild(recommendationDiv);
+
+                        const marker = new google.maps.Marker({
+                            position: place.location,
+                            map: map,
+                            title: place.name,
+                        });
+                        markers.push(marker);
+
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `
+                                <div>
+                                    <h3>${place.name}</h3>
+                                    <p>Rating: ${place.rating}</p>
+                                    <p>Address: ${place.vicinity}</p>
+                                    <p>Types: ${place.types}</p>
+                                </div>
+                            `,
+                        });
+
+                        marker.addListener("mouseover", () => {
+                            infoWindow.open(map, marker);
+                            highlightRecommendation(index);
+                        });
+
+                        marker.addListener("mouseout", () => {
+                            infoWindow.close();
+                            unhighlightRecommendation(index);
+                        });
+
+                        recommendationDiv.addEventListener("click", () => {
+                            toggleSelection(recommendationDiv, index);
+                        });
+
+                        recommendationDiv.addEventListener("mouseover", () => {
+                            infoWindow.open(map, marker);
+                            marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+                        });
+
+                        recommendationDiv.addEventListener("mouseout", () => {
+                            infoWindow.close();
+                            marker.setIcon(null);
+                        });
+                    });
+
+                    toggleView('cubes');
+                });
+        }
+
+        function highlightRecommendation(index) {
+            const recommendationDiv = document.querySelector(`.recommendation[data-index='${index}']`);
+            recommendationDiv.style.backgroundColor = '#f6d365';
+        }
+
+        function unhighlightRecommendation(index) {
+            const recommendationDiv = document.querySelector(`.recommendation[data-index='${index}']`);
+            recommendationDiv.style.backgroundColor = '#ffffff';
+        }
+
+        function filterRecommendations(filter) {
+            const recommendations = document.querySelectorAll('.recommendation');
+            recommendations.forEach(recommendation => {
+                const types = recommendation.getAttribute('data-types');
+                if (types.includes(filter) || filter === 'all') {
+                    recommendation.classList.add('show');
+                    recommendation.style.display = 'block';
+                } else {
+                    recommendation.classList.remove('show');
+                    recommendation.style.display = 'none';
+                }
+            });
+
+            markers.forEach((marker, index) => {
+                const types = recommendationsData[index].types;
+                if (types.includes(filter) || filter === 'all') {
+                    marker.setMap(map);
+                } else {
+                    marker.setMap(null);
+                }
+            });
+        }
+
+        function toggleSelection(element, index) {
+    const place = recommendationsData[index];
+    const placeId = place.name;
+
+    if (!selectedPlaces.some(p => p.name === placeId)) {
+        selectedPlaces.push(place);
+        element.classList.add("selected");
+    } else {
+        selectedPlaces = selectedPlaces.filter(p => p.name !== placeId);
+        element.classList.remove("selected");
+    }
+}
+
+function createItinerary() {
+    if (selectedPlaces.length > 0) {
+        // Send the selected places to the backend
+        fetch('/create_itinerary', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ places: selectedPlaces })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the budget.html page
+                window.location.href = 'budget.html';
+            } else {
+                alert("An error occurred while creating the itinerary.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        alert("Please select at least one place to create an itinerary.");
+    }
+}
+
+
+
+        function toggleView(view) {
+            const formattedTextDiv = document.getElementById("formatted-text");
+            const filtersDiv = document.querySelector(".filters");
+            const recommendationsListDiv = document.getElementById("recommendations-list");
+
+            if (view === 'text') {
+                formattedTextDiv.style.display = 'block';
+                filtersDiv.style.display = 'none';
+                recommendationsListDiv.style.display = 'none';
+            } else {
+                formattedTextDiv.style.display = 'none';
+                filtersDiv.style.display = 'block';
+                recommendationsListDiv.style.display = 'block';
+            }
+        }
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
