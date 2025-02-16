@@ -48,7 +48,7 @@ def recommend_places(user_profile, location):
     
     Suggest fun activities, places to visit, and things to do in {location} based on this user's profile.
 
-    **Format the response as a JSON object with the following structure:**
+    **Format the response as a JSON object with the following structure:** but don't include markdown in the text field. Give out a well formatted paragraph.
 
     {{
         "text": \"\"\"
