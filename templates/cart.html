@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Cart</title>
+    <style>
+        .place-card {
+            border: 1px solid #ccc;
+            padding: 16px;
+            margin: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .place-card h3 {
+            margin-top: 0;
+        }
+        .comment-section {
+            margin-top: 16px;
+        }
+        .comment-section textarea {
+            width: 100%;
+            height: 60px;
+        }
+        .rating {
+            display: flex;
+            gap: 4px;
+        }
+        .rating span {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Cart</h1>
+    <div id="cart-container">
+        {% for place in places %}
+        <div class="place-card">
+            <h3>{{ place.name }}</h3>
+            <p>Rating: {{ place.rating }}</p>
+            <p>Address: {{ place.vicinity }}</p>
+            <p>Types: {{ place.types }}</p>
+            <div class="comment-section">
+                <label for="comment-{{ loop.index }}">Comment:</label>
+                <textarea id="comment-{{ loop.index }}" placeholder="Leave a comment..."></textarea>
+                <div class="rating">
+                    <label for="rating-{{ loop.index }}">My Rating:</label>
+                    <span>☆</span><span>☆</span><span>☆</span><span>☆</span><span>☆</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

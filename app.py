@@ -7,7 +7,7 @@ import tempfile
 from preprocess import curate_user_profile
 from recommend import recommend_places
 from getPlacesData import get_lat_lon_google
-from chatbot import generate_answer, describe_image
+from chatbot import generate_answer, describe_image, estimate_travel_costs, generate_itinerary
 import base64
 import os
 
@@ -48,8 +48,8 @@ def send_message():
     user_message = request.json.get('message')
     
     # Generate bot response
-    bot_response = generate_answer("", "Hello", api_key=gemini_api_key)
-    # bot_response = generate_answer(conversation_history, user_message, api_key=gemini_api_key)
+    #bot_response = generate_answer("", "Hello", api_key=gemini_api_key)
+    bot_response = generate_answer(conversation_history, user_message, api_key=gemini_api_key)
     
     # Update conversation history
     conversation_history.append((user_message, bot_response))
@@ -77,16 +77,31 @@ def create_cart():
     session['selected_places'] = selected_places  # Store in session
     return jsonify({'success': True})
 
-@app.route("/cart")
+@app.route('/budget_send', methods=['POST'])
+def budgest_send():
+    selected_places = session.get('selected_places', [])
+    budget = estimate_travel_costs(selected_places, gemini_api_key)
+    return jsonify({'budget': budget})
+
+@app.route('/itinerary_send', methods=['POST'])
+def itinerary_send():
+    selected_places = session.get('selected_places', [])
+    itinerary = generate_itinerary(selected_places, gemini_api_key)
+    print(itinerary)
+    return jsonify({'itinerary': itinerary})
+
+
+@app.route("/cart.html")
 def cart():
-    selected_places = session['selected_places'] 
-    return render_template('cart.html', places=selected_places)
+    return render_template('cart.html')
 
 @app.route('/budget.html')
 def budget():
     selected_places = session.get('selected_places', [])
+    budget = estimate_travel_costs(selected_places, gemini_api_key)
+    itinerary = generate_itinerary(selected_places, gemini_api_key)
     print(selected_places)
-    return render_template('budget.html', places=selected_places)
+    return render_template('budget.html', places=selected_places, itinerary=itinerary, budget=budget)
 
 @app.route("/submit_preferences", methods=["POST"])
 def submit_preferences():
